@@ -1,4 +1,5 @@
 // Write your code here
+// Write your code here
 import {Component} from 'react'
 import './index.css'
 
@@ -7,37 +8,68 @@ class DigitalTimer extends Component {
     minutes: 25,
     seconds: 0,
     isStart: false,
+    changeTime: 25,
   }
 
-  //   componentDidMount = () => {
-  //     const {isStart} = this.state
-  //     if (isStart === false) {
-
-  //     }
-  //   }
-
-  //   componentWillUnmount() {
-  //     clearInterval(this.timerID)
-  //   }
+  incrementTimeElapsedInSeconds = () => {
+    this.setState(prev => {
+      const {minutes, seconds} = prev
+      if (minutes > 0 && seconds === 0) {
+        return {minutes: minutes - 1, seconds: 59}
+      }
+      if (minutes >= 0 && seconds >= 1) {
+        return {seconds: seconds - 1}
+      }
+      clearInterval(this.timerID)
+      return {minutes: 0, seconds: 0}
+    })
+  }
 
   isStartPauseBtn = () => {
-    this.timerID = setInterval(() => {
-      this.setState(prevS => {
-        const {minutes, seconds, isStart} = prevS
-        if (minutes > 0 && seconds === 0) {
-          return {minutes: minutes - 1, seconds: 59, isStart: !isStart}
-        }
-        if (minutes >= 0 && seconds >= 1) {
-          return {seconds: seconds - 1, isStart: !isStart}
-        }
-        clearInterval(this.timerID)
-        return {minutes: 0, seconds: 0, isStart: !isStart}
-      })
-    }, 1000)
+    const {isStart} = this.state
+    if (isStart) {
+      clearInterval(this.timerID)
+    } else {
+      this.timerID = setInterval(this.incrementTimeElapsedInSeconds, 1000)
+    }
+    this.setState(prevState => ({isStart: !prevState.isStart}))
   }
 
+  onRestart = () => {
+    clearInterval(this.timerID)
+    this.setState({minutes: 25, seconds: 0, isStart: false})
+  }
+
+  decreaseMin = () => {
+    this.setState(prev => {
+      const {isStart, changeTime} = prev
+      if (isStart === false && changeTime > 0) {
+        return {changeTime: changeTime - 1, minutes: changeTime - 1, seconds: 0}
+      }
+      return null
+    })
+  }
+
+  increaseMin = () => {
+    this.setState(prev => {
+      const {isStart, changeTime} = prev
+      if (isStart === false && changeTime <= 59) {
+        return {changeTime: changeTime + 1, minutes: changeTime + 1, seconds: 0}
+      }
+      return null
+    })
+  }
+  //   if (minutes > 0 && seconds === 0) {
+  //       return {minutes: minutes - 1, seconds: 59}
+  //   }
+  //   if (minutes >= 0 && seconds >= 1) {
+  //       return {seconds: seconds - 1}
+  //   }
+  //   clearInterval(this.timerID)
+  //   return {minutes: 0, seconds: 0}
+
   render() {
-    const {minutes, seconds, isStart} = this.state
+    const {minutes, seconds, isStart, changeTime} = this.state
     console.log(seconds, isStart)
     return (
       <div className="bg">
@@ -50,7 +82,7 @@ class DigitalTimer extends Component {
                   {minutes > 9 ? minutes : `0${minutes}`}:
                   {seconds > 9 ? seconds : `0${seconds}`}
                 </h1>
-                <p className="timer-status">{isStart ? 'Running' : 'Pasued'}</p>
+                <p className="timer-status">{isStart ? 'Running' : 'Paused'}</p>
               </div>
             </div>
             <div className="timer-changes">
@@ -62,22 +94,28 @@ class DigitalTimer extends Component {
                     className="timer-btn"
                   >
                     {!isStart ? (
-                      <img
-                        src="https://assets.ccbp.in/frontend/react-js/play-icon-img.png"
-                        className="play-pause-btn"
-                        alt="play icon"
-                      />
+                      <>
+                        <img
+                          src="https://assets.ccbp.in/frontend/react-js/play-icon-img.png"
+                          className="play-pause-btn"
+                          alt="play icon"
+                        />
+                        <h1 className="timer-btn-label">Start</h1>
+                      </>
                     ) : (
-                      <img
-                        src="https://assets.ccbp.in/frontend/react-js/pause-icon-img.png"
-                        className="play-pause-btn"
-                        alt="pause icon"
-                      />
+                      <>
+                        <img
+                          src="https://assets.ccbp.in/frontend/react-js/pause-icon-img.png"
+                          className="play-pause-btn"
+                          alt="pause icon"
+                        />
+                        <h1 className="timer-btn-label">Pause</h1>
+                      </>
                     )}
                   </button>
-                  <h1 className="timer-btn-label">
+                  {/* <h1 className="timer-btn-label">
                     {!isStart ? 'Start' : 'Pause'}
-                  </h1>
+                  </h1> */}
                 </div>
                 <div className="btn-cont">
                   <button
@@ -90,22 +128,22 @@ class DigitalTimer extends Component {
                       className="reset-btn"
                       alt="reset icon"
                     />
+                    <h1 className="timer-btn-label">Reset</h1>
                   </button>
-                  <h1 className="timer-btn-label">Reset</h1>
                 </div>
               </div>
               <p className="timer-des">Set Timer limit</p>
               <div className="timer-changer">
                 <button
-                  onClick={this.changeMin}
+                  onClick={this.decreaseMin}
                   type="button"
                   className="symbol"
                 >
                   -
                 </button>
-                <p className="timer-change-option">{minutes}</p>
+                <p className="timer-change-option">{changeTime}</p>
                 <button
-                  onClick={this.changeMin}
+                  onClick={this.increaseMin}
                   type="button"
                   className="symbol"
                 >
